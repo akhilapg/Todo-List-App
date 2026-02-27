@@ -1,8 +1,42 @@
+import 'dart:math';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:todo_list_app/screens/home_screen.dart';
 import 'package:todo_list_app/screens/login_screen.dart';
-class RegisterScreen extends StatelessWidget {
+class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+ TextEditingController emailAddress=TextEditingController();
+ TextEditingController password=TextEditingController();
+    Future signUp() async{
+      try {
+        print("email address:${emailAddress.text}");
+        print("password${password.text}");
+        final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: emailAddress.text,
+          password: password.text,
+        );
+
+    if(credential.user!=null){
+    Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
+    }
+      } on
+      FirebaseAuthException catch (e) {
+        if (e.code == 'weak-password') {
+          print('The password provided is too weak.');
+        } else if (e.code == 'email-already-in-use') {
+          print('The account already exists for that email.');
+        }
+      } catch (e) {
+        print(e);
+      }
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +57,7 @@ class RegisterScreen extends StatelessWidget {
               SizedBox(height: 10),
               Text("Username"),
               TextField(
+                controller: emailAddress,
                 decoration: InputDecoration(
                   hintText: "Enter your Username",
                   hintStyle: TextStyle(color: Colors.grey),
@@ -34,6 +69,7 @@ class RegisterScreen extends StatelessWidget {
               SizedBox(height: 20),
               Text("Password"),
               TextField(
+                controller: password,
                 obscureText: true,
                 decoration: InputDecoration(
                   hintText: "Password",
@@ -68,6 +104,7 @@ class RegisterScreen extends StatelessWidget {
                     backgroundColor: Color(0xFF6C63FF),
                   ),
                   onPressed: () {
+                    signUp();
                   },
                   child: Text("Register"),
                 ),

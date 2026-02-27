@@ -1,9 +1,48 @@
+import 'dart:math';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:todo_list_app/screens/home_screen.dart';
 import 'package:todo_list_app/screens/register_screen.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class LoginScreen extends StatefulWidget {
+   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+TextEditingController emailAddress=TextEditingController();
+TextEditingController password=TextEditingController();
+
+   Future login()async{
+     print("something");
+     print("email${emailAddress.text}");
+     print("password${password.text}");
+     try {
+       print("try isnid");
+       final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+           email: emailAddress.text,
+           password: password.text
+       );
+       print("credentail");
+       print(credential.user!.uid);
+       if(credential.user!=null){
+         print("logged");
+         Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
+       }
+     } on FirebaseAuthException catch (e) {
+       if (e.code == 'user-not-found') {
+         print('No user found for that email.');
+       } else if (e.code == 'wrong-password') {
+         print('Wrong password provided for that user.');
+       }
+     }  catch(e){
+       print(e);
+     }
+
+   }
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +65,7 @@ class LoginScreen extends StatelessWidget {
               SizedBox(height: 40),
               Text("Username"),
               TextField(
+                controller: emailAddress,
                 decoration: InputDecoration(
                   hintText: "Enter your Username",
                   hintStyle: TextStyle(color: Colors.grey),
@@ -37,6 +77,7 @@ class LoginScreen extends StatelessWidget {
               SizedBox(height: 20),
               Text("Password"),
               TextField(
+                controller: password,
                 obscureText: true,
                 decoration: InputDecoration(
                   hintText: "Password",
@@ -58,10 +99,7 @@ class LoginScreen extends StatelessWidget {
                     backgroundColor: Color(0xFF6C63FF),
                   ),
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => HomeScreen()),
-                    );
+                  login();
                   },
                   child: Text("Login"),
                 ),

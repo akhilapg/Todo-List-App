@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -45,9 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar:
-      BottomAppBar(
-        shape: CircularNotchedRectangle(),
-        child:
+      
       BottomNavigationBar(backgroundColor: Colors.black26,
           currentIndex: selectedIndex,
           onTap: (index) {
@@ -80,7 +77,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 }

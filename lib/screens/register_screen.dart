@@ -1,7 +1,10 @@
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todo_list_app/local_keys.dart';
 import 'package:todo_list_app/screens/home_screen.dart';
 import 'package:todo_list_app/screens/login_screen.dart';
 class RegisterScreen extends StatefulWidget {
@@ -14,7 +17,21 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
  TextEditingController emailAddress=TextEditingController();
  TextEditingController password=TextEditingController();
+ TextEditingController userName=TextEditingController();
+
     Future signUp() async{
+      var    db = FirebaseFirestore.instance;
+      final prefs=await SharedPreferences.getInstance();
+      // Create a new user with a first and last name
+      final user = {
+        "full_name": userName.text,
+        "email_address": emailAddress.text,
+        "password":password.text
+      };
+
+// Add a new document with a generated ID
+      db.collection("users").add(user).then((DocumentReference doc) =>
+          print('DocumentSnapshot added with ID: ${doc.id}'));
       try {
         print("email address:${emailAddress.text}");
         print("password${password.text}");
@@ -24,6 +41,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
 
     if(credential.user!=null){
+      prefs.setBool(LocalKeys.auth_key, true);
     Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
     }
       } on
@@ -57,9 +75,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
               SizedBox(height: 10),
               Text("Username"),
               TextField(
-                controller: emailAddress,
+                controller: userName,
                 decoration: InputDecoration(
                   hintText: "Enter your Username",
+                  hintStyle: TextStyle(color: Colors.grey),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+              SizedBox(height: 10,),
+              Text("Email Address"),
+              TextField(
+                controller: emailAddress,
+                decoration: InputDecoration(
+                  hintText: "Enter your Email Address",
                   hintStyle: TextStyle(color: Colors.grey),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),

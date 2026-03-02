@@ -2,8 +2,11 @@ import 'dart:math';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo_list_app/screens/home_screen.dart';
 import 'package:todo_list_app/screens/register_screen.dart';
+
+import '../local_keys.dart';
 
 class LoginScreen extends StatefulWidget {
    const LoginScreen({super.key});
@@ -17,6 +20,7 @@ TextEditingController emailAddress=TextEditingController();
 TextEditingController password=TextEditingController();
 
    Future login()async{
+     final prefs = await SharedPreferences.getInstance();
      print("something");
      print("email${emailAddress.text}");
      print("password${password.text}");
@@ -30,6 +34,7 @@ TextEditingController password=TextEditingController();
        print(credential.user!.uid);
        if(credential.user!=null){
          print("logged");
+         prefs.setBool(LocalKeys.auth_key, true);
          Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
        }
      } on FirebaseAuthException catch (e) {
@@ -49,7 +54,6 @@ TextEditingController password=TextEditingController();
     // double width = MediaQuery.of(context).size.width;
     // double height = MediaQuery.of(context).size.height;
     final size = MediaQuery.of(context).size;
-
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -114,49 +118,7 @@ TextEditingController password=TextEditingController();
                 ],
               ),
               SizedBox(height: 20),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  side: BorderSide(color: Color(0xFF6C63FF))
-                ),
-                onPressed: () {},
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/images/google.png',
-                      width: 48,
-                      height: 48,
-                    ),
-                    SizedBox(height: 8),
-                    Text("Login with Google"),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  side: BorderSide(color: Color(0xFF6C63FF))
-                ),
-                onPressed: () {},
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/images/apple.png',
-                      width: 48,
-                      height: 48,
-                    ),
-                    SizedBox(height: 8),
-                    Text("Login with Appe"),
-                  ],
-                ),
-              ),
+
 
               SizedBox(height: 20),
               Row(

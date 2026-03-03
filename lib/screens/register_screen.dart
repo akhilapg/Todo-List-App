@@ -8,7 +8,8 @@ import 'package:todo_list_app/local_keys.dart';
 import 'package:todo_list_app/screens/home_screen.dart';
 import 'package:todo_list_app/screens/login_screen.dart';
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  const RegisterScreen({super.key}
+      );
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -20,7 +21,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
  TextEditingController userName=TextEditingController();
 
     Future signUp() async{
+      //creating firebase firestore object  to assing db varibale
       var    db = FirebaseFirestore.instance;
+      // assing sharedprefernces intailization to prefs object vairble  to access local storage
+      //capablity
       final prefs=await SharedPreferences.getInstance();
       // Create a new user with a first and last name
       final user = {
@@ -30,18 +34,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
       };
 
 // Add a new document with a generated ID
-      db.collection("users").add(user).then((DocumentReference doc) =>
-          print('DocumentSnapshot added with ID: ${doc.id}'));
+
       try {
         print("email address:${emailAddress.text}");
         print("password${password.text}");
+        //calling firebase authentication for new user creating account with email and password
         final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: emailAddress.text,
           password: password.text,
         );
 
-    if(credential.user!=null){
-      prefs.setBool(LocalKeys.auth_key, true);
+    // this below code for checking current authnecation is success then only go to
+        // to home screen like currently credentail user is null the meaning firebase authenctaion not created
+
+        if(credential.user!=null){
+          db.collection("users").doc(credential.user?.uid).set(user).then((_){
+            print("data added with ${credential.user?.uid}");
+          });
+        prefs.setBool(LocalKeys.auth_key, true);
     Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
     }
       } on

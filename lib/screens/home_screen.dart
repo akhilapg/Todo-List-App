@@ -65,82 +65,98 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Color(0xFF6C63FF),
         onPressed: () {
-          showDialog(
+          showModalBottomSheet(
             context: context,
             builder: (context) {
-              return Dialog(
+              return SizedBox(
+                height: sh * 0.5,
+                width: double.infinity,
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: SizedBox(
-                    height: sh * 0.8,
-                    width: sw * 0.6,
+                    padding: const EdgeInsets.all(25.0),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Add Task", style: TextStyle(
-                            fontSize: 20, color: Colors.white),),
-                        SizedBox(height: 20,),
-                        TextFormField(
-                          decoration: InputDecoration(
-                            hintText: "Title",
-                            hintStyle: TextStyle(
-                                fontSize: 12, color: Colors.white),
-                          ),
-                        ),
-                        SizedBox(height: 10,),
-                        TextFormField(
-                          readOnly: true,
-                          decoration: InputDecoration(
-                            hintText: "Description",
-                            hintStyle: TextStyle(
-                                fontSize: 12, color: Colors.white),
-                          ),
-
-                        ),
-                        TextFormField(
-                          decoration: InputDecoration(
-                              hintText: "Select date",
-                              hintStyle: TextStyle(
-                                fontSize: 12, color: Colors.white,),
-                              suffixIcon
-                              :IconButton(onPressed: () {
-
-                                showDatePicker(
-                                    context: context,
-                                    firstDate: DateTime(1990),
-                                    lastDate: DateTime(2024).add(Duration(days: 365)));
-                              }, icon: Icon(Icons.calendar_month))
-                          ),
-                        ),
-
-
-                        // TextField(
-                        //   decoration: InputDecoration(
-                        //     hintText: 'Title',hintStyle: TextStyle(color: Colors.white)
-                        //   ),
-                        // ),
-                        // TextField(
-                        //   decoration: InputDecoration(
-                        //     hintText: 'Description',hintStyle: TextStyle(color: Colors.white),
-                        //   ),
-                        // )
-
-                      ],
+                      Text("Add Task", style: TextStyle(
+                        fontSize: 20, color: Colors.white),),
+                    SizedBox(height: 20,),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5)),
+                        hintText: "Title",
+                        hintStyle: TextStyle(
+                            fontSize: 12, color: Colors.white),
+                      ),
                     ),
-                  ),
-                ),
+                    SizedBox(height: 10,),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5)),
+                        hintText: "Description",
+                        hintStyle: TextStyle(
+                            fontSize: 12, color: Colors.white),
+                      ),
+                    ),
+                    Align(alignment: Alignment.bottomRight,
+                      child: IconButton(onPressed: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              DateTime selectDate = DateTime.now();
+                              return Dialog(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadiusGeometry.circular(20)),
+                                child: Container(
+                                  height: 500,
+                                  width: 400,
+                                  padding: EdgeInsets.all(16),
+                                  child: Column(
+                                    children: [
+                                      CalendarDatePicker(
+                                        initialDate: DateTime.now(),
+                                        firstDate: DateTime(2000),
+                                        lastDate: DateTime(2050),
+                                        onDateChanged: (date) {
+                                          selectDate =date;
+                                          print("Selected date : $date");
+                                          // Navigator.pop(context);
+                                        },
+                                    ),
+                                // Spacer(),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: [
+                                    TextButton(onPressed: () {
+                                      Navigator.pop(context);
+                                    }, child: Text("Cancel")),
+                                    SizedBox(width: 10,),
+                                    ElevatedButton(onPressed: () async {
+                                      TimeOfDay? time =await showTimePicker(
+                                          context: context, 
+                                          initialTime: TimeOfDay.now());
+                                      if(time!=null){
+                                        print("Selected Time:${time.format(context)}");
+                                      }
+                                    }, child: Text("choose time")),
+                                  ],
+                                ),
+                                ],
+                                  ),
+                                ),
+                              );
+                            },
+                        );
+                      },
+                          icon: Icon(Icons.send,color: Colors.blue,)),
+                    )
+                ],
+              ),)
+              ,
               );
             },
           );
-
-          // Navigator.push(context, MaterialPageRoute(builder: (context)=>AddTaskScreen()));
-          // showModalBottomSheet(context: context, builder: (BuildContext context) {
-          //   return Container(
-          //     height: 400,
-          //     child: Center(child: Text('Text'),),
-          //   );
-          // });
         },
         child: Icon(Icons.add),
       ),
@@ -165,14 +181,6 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icon(Icons.home, size: 15),
               label: "Index",
             ),
-            // BottomNavigationBarItem(
-            //   icon: Icon(Icons.calendar_today, size: 15),
-            //   label: "Calender",
-            // ),
-            // BottomNavigationBarItem(
-            //   icon: Icon(Icons.timer, size: 15),
-            //   label: "Focuse",
-            // ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person, size: 15),
               label: "Profile",

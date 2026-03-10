@@ -10,10 +10,91 @@ class HomeScreen extends StatefulWidget {
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
+
 }
 
 class _HomeScreenState extends State<HomeScreen> {
   int selectedIndex = 0;
+
+  TextEditingController titleController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
+
+  DateTime? selectedDate;
+  TimeOfDay? selectedTime;
+
+  List<Map<String,String>> task = [];
+
+  void openAddTaskDialog(){
+    showDialog(context: context, builder: (cotext) {
+      return AlertDialog(
+        title: Text("Add Task"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: titleController,
+              decoration: const InputDecoration(
+                labelText: "Title",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 10,),
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(
+                labelText: "Description",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 10,),
+
+            ElevatedButton(onPressed: () async {
+              Navigator.pop(context);
+              await pickDate();
+            },
+                child: const Text("Next"),
+            )
+          ],
+        ),
+      );
+    });
+  }
+
+  Future<void> pickDate()async {
+    DateTime? date = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(2000),
+        lastDate: DateTime(2050),
+    );
+    if (date != null) {
+      selectedDate = date;
+      await pickTime();
+    }
+  }
+
+  Future<void> pickTime() async {
+    TimeOfDay? time = await showTimePicker(
+        context: context, initialTime: TimeOfDay.now(),
+    );
+    if (time!=null) {
+      selectedTime = time;
+      saveTask();
+    }
+  }
+
+  void saveTask() {
+    setState(() {
+      task.add({
+        "title":titleController.text,
+        "description": descriptionController.text,
+        "date" : selectedDate!.toString().split("")[0],
+        "time" : selectedTime!.format(context),
+      } );
+    });
+    titleController.clear();
+    descriptionController.clear();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,245 +144,78 @@ class _HomeScreenState extends State<HomeScreen> {
           borderRadius: BorderRadius.all(Radius.circular(50.0)),
         ),
         backgroundColor: Color(0xFF6C63FF),
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return Dialog(
-                child: SizedBox(
-                  height: sh * 0.35,
-                  width: sw * double.infinity,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 10,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Add Task",
-                          style: TextStyle(fontSize: 25, color: Colors.white),
-                        ),
-                        SizedBox(height: 10),
-                        TextField(
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        TextField(
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            IconButton(
-                              onPressed: ()  {
-                                 showDatePicker(
-                                  context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime(2000),
-                                  lastDate: DateTime(2050),
-                                );
-                                // if (picked != null) {
-                                //   Navigator.pop(context)
-                              },
-                              icon: Icon(Icons.send, size: 15),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
-
-          // Navigator.of(context).pop();
-          // showDialog(context: context, builder: (context){
-          //   return AlertDialog(
-          //     title: Text("Add Task"),
-          //     content: Column(
-          //       mainAxisSize: MainAxisSize.min,
-          //       children: [
-          //         TextField(
-          //           controller: titleController,
-          //           decoration: const InputDecoration(
-          //             labelText: "Task Title",
-          //           ),
-          //         ),
-          //         TextField(
-          //           controller: descriptionController,
-          //           decoration: InputDecoration(
-          //             labelText: "description",
-          //           ),
-          //         )
-          //       ],
-          //     ),
-          //     actions: [
-          //       ElevatedButton(onPressed: (){
-          //         String title = titleController
-          //       }, child: child)
-          //     ],
-          //   )
-          // })
-          // showModalBottomSheet(
+        onPressed: openAddTaskDialog,
+          // showDialog(
           //   context: context,
           //   builder: (context) {
-          //     return SizedBox(
-          //       height: sh * 0.5,
-          //       width: double.infinity,
-          //       child: Padding(
-          //         padding: const EdgeInsets.all(25.0),
-          //         child: Column(
-          //           mainAxisAlignment: MainAxisAlignment.start,
-          //           crossAxisAlignment: CrossAxisAlignment.start,
-          //           children: [
-          //             Text(
-          //               "Add Task",
-          //               style: TextStyle(fontSize: 20, color: Colors.white),
-          //             ),
-          //             SizedBox(height: 20),
-          //             TextFormField(
-          //               decoration: InputDecoration(
-          //                 border: OutlineInputBorder(
-          //                   borderRadius: BorderRadius.circular(5),
-          //                 ),
-          //                 hintText: "Title",
-          //                 hintStyle: TextStyle(
-          //                   fontSize: 12,
-          //                   color: Colors.white,
+          //     return Dialog(
+          //       child: SizedBox(
+          //         height: sh * 0.35,
+          //         width: sw * double.infinity,
+          //         child: Padding(
+          //           padding: const EdgeInsets.symmetric(
+          //             horizontal: 10,
+          //             vertical: 10,
+          //           ),
+          //           child: Column(
+          //             crossAxisAlignment: CrossAxisAlignment.start,
+          //             children: [
+          //               Text(
+          //                 "Add Task",
+          //                 style: TextStyle(fontSize: 25, color: Colors.white),
+          //               ),
+          //               SizedBox(height: 10),
+          //               TextField(
+          //                 decoration: InputDecoration(
+          //                   border: OutlineInputBorder(
+          //                     borderRadius: BorderRadius.circular(5),
+          //                   ),
           //                 ),
           //               ),
-          //             ),
-          //             SizedBox(height: 10),
-          //             TextFormField(
-          //               decoration: InputDecoration(
-          //                 border: OutlineInputBorder(
-          //                   borderRadius: BorderRadius.circular(5),
-          //                 ),
-          //                 hintText: "Description",
-          //                 hintStyle: TextStyle(
-          //                   fontSize: 12,
-          //                   color: Colors.white,
+          //               SizedBox(height: 10),
+          //               TextField(
+          //                 decoration: InputDecoration(
+          //                   border: OutlineInputBorder(
+          //                     borderRadius: BorderRadius.circular(5),
+          //                   ),
           //                 ),
           //               ),
-          //             ),
-          //             Align(
-          //               alignment: Alignment.bottomRight,
-          //               child: IconButton(
-          //                 onPressed: () {
-          //                   showDialog(
-          //                     context: context,
-          //                     builder: (context) {
-          //                       DateTime selectDate = DateTime.now();
-          //                       return Dialog(
-          //                         shape: RoundedRectangleBorder(
-          //                           borderRadius: BorderRadiusGeometry.circular(
-          //                             20,
-          //                           ),
-          //                         ),
-          //                         child: Container(
-          //                           height: 500,
-          //                           width: 400,
-          //                           padding: EdgeInsets.all(16),
-          //                           child: Column(
-          //                             children: [
-          //                               CalendarDatePicker(
-          //                                 initialDate: DateTime.now(),
-          //                                 firstDate: DateTime(2000),
-          //                                 lastDate: DateTime(2050),
-          //                                 onDateChanged: (date) {
-          //                                   selectDate = date;
-          //                                   print("Selected date : $date");
-          //                                   Navigator.pushReplacement(
-          //                                     context,
-          //                                     MaterialPageRoute(
-          //                                       builder: (context) =>
-          //                                           HomeScreen(),
-          //                                     ),
-          //                                   );
-          //                                 },
-          //                               ),
-          //                               // Spacer(),
-          //                               Row(
-          //                                 mainAxisAlignment:
-          //                                     MainAxisAlignment.spaceAround,
-          //                                 children: [
-          //                                   TextButton(
-          //                                     onPressed: () {
-          //                                       Navigator.pop(context);
-          //                                     },
-          //                                     child: Text("Cancel"),
-          //                                   ),
-          //                                   SizedBox(width: 10),
-          //                                   ElevatedButton(
-          //                                     onPressed: () async {
-          //                                       TimeOfDay? time =
-          //                                           await showTimePicker(
-          //                                             context: context,
-          //                                             initialTime:
-          //                                                 TimeOfDay.now(),
-          //                                           );
-          //                                       if (time != null) {
-          //                                         print(
-          //                                           "Selected Time:${time.format(context)}",
-          //                                         );
-          //                                       }
-          //                                     },
-          //                                     child: Text("choose time"),
-          //                                   ),
-          //                                 ],
-          //                               ),
-          //                             ],
-          //                           ),
-          //                         ),
+          //               SizedBox(height: 10),
+          //               Row(
+          //                 mainAxisAlignment: MainAxisAlignment.end,
+          //                 children: [
+          //                   IconButton(
+          //                     onPressed: ()  {
+          //                        showDatePicker(
+          //                         context: context,
+          //                         initialDate: DateTime.now(),
+          //                         firstDate: DateTime(2000),
+          //                         lastDate: DateTime(2050),
           //                       );
+          //                       // if (picked != null) {
+          //                       //   Navigator.pop(context)
           //                     },
-          //                   );
-          //                 },
-          //                 icon: Icon(Icons.send, color: Colors.blue),
+          //                     icon: Icon(Icons.send, size: 15),
+          //                   ),
+          //                 ],
           //               ),
-          //             ),
-          //           ],
+          //             ],
+          //           ),
           //         ),
           //       ),
           //     );
           //   },
           // );
-        },
         child: Icon(Icons.add, size: 25),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         shape: CircularNotchedRectangle(),
         child:
-            // Container(
-            //   height: 60,
-            //   child: Column(
-            //     mainAxisSize: MainAxisSize.min,
-            //     crossAxisAlignment: CrossAxisAlignment.start,
-            //     children: <Widget>[
-            //       // Icon(Icons.home)
-            //       IconButton(onPressed: (){}, icon: Icon(Icons.home,size: 25,),),
-            //       // Text("Home",style: TextStyle(fontSize: 10)),
-            //     ],
-            //   ),
-            // ),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                // buildNavItem(Icons.home, "Home"),
-                // buildNavItem(Icons.person, "Profile")
                 IconButton(onPressed: () {}, icon: Icon(Icons.home)),
                 IconButton(onPressed: () {}, icon: Icon(Icons.person)),
               ],
@@ -310,12 +224,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
-// Widget buildNavItem(IconData icon,String label){
-//   return Column(
-//     children: [
-//       Icon(icon),
-//       Text(label)
-//     ],
-//   );
-// }

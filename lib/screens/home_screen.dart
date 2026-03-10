@@ -48,11 +48,13 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 10,),
 
-            ElevatedButton(onPressed: () async {
+            ElevatedButton.icon(onPressed: () async {
               Navigator.pop(context);
               await pickDate();
             },
-                child: const Text("Next"),
+                // child: const Text("Next"),
+              icon: const Icon(Icons.send),
+              label: const Text(""),
             )
           ],
         ),
@@ -66,6 +68,8 @@ class _HomeScreenState extends State<HomeScreen> {
         initialDate: DateTime.now(),
         firstDate: DateTime(2000),
         lastDate: DateTime(2050),
+      // helpText: "Choose time",
+      confirmText: 'Choose time'
     );
     if (date != null) {
       selectedDate = date;
@@ -75,7 +79,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> pickTime() async {
     TimeOfDay? time = await showTimePicker(
-        context: context, initialTime: TimeOfDay.now(),
+        context: context,
+      initialTime: TimeOfDay.now(),
+      confirmText: 'Save'
     );
     if (time!=null) {
       selectedTime = time;

@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
         "description": descriptionController.text,
         "date": selectedDate!.toString(),
         "time": selectedTime!.format(context),
-      // "created": Timestamp.now()
+      "createdAt": Timestamp.now()
       });
 
     titleController.clear();
@@ -141,36 +141,39 @@ class _HomeScreenState extends State<HomeScreen> {
           SizedBox(width: 15),
         ],
       ),
-      body: tasks.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "What do you want to do today?",
-                    style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    "Tap + to add yor tasks",
-                    style: TextStyle(fontSize: 20),
-                  ),
-                ],
-              ),
-            )
-
-      // display tasks from firestore
-      :StreamBuilder<QuerySnapshot>(
-        stream: firestore.collection("tasks").orderBy("createdat").snapshots(),
+      body: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance.collection("tasks").orderBy("createdAt", descending: true).snapshots(),
           builder: (context,snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CircularProgressIndicator(),);
             }
             if(!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              print(snapshot.data?.docs);
               return Center(
-                child: Text("No tasks available"),
+                // child: Text("No tasks available"),
+                // );
+                // }
+                // Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "What do you want to do today?",
+                      style: TextStyle(
+                          fontSize: 23, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      "Tap + to add yor tasks",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ],
+                ),
               );
             }
+
+      // display tasks from firestore
+      
             final tasks = snapshot.data!.docs;
 
             // )
@@ -184,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   title: Text(task["title"]),
                   subtitle: Text(
                     "${task["description"]}"
-                        "\n${"date"} ${task["time"]}",
+                        "\n${task["date"]} ${task["time"]}",
                   ),
                   ),
                 );

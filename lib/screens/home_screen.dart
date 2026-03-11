@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo_list_app/local_keys.dart';
 import 'package:todo_list_app/screens/add_task_screen.dart';
 import 'package:todo_list_app/screens/login_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,15 +15,18 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int selectedIndex = 0;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance; // firestore database instance
 
+  // text controls
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
-
+  // selected date and time
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
 
   List<Map<String, String>> tasks = [];
 
+// add task dialog
   void openAddTaskDialog() {
     showDialog(
       context: context,
@@ -54,7 +58,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.pop(context);
                   await pickDate();
                 },
-                // child: const Text("Next"),
                 icon: const Icon(Icons.send),
                 label: const Text(""),
               ),
@@ -65,13 +68,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // date picker
   Future<void> pickDate() async {
     DateTime? date = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2050),
-      // helpText: "Choose time",
       confirmText: 'Choose time',
     );
     if (date != null) {
@@ -80,6 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  // time picker
   Future<void> pickTime() async {
     TimeOfDay? time = await showTimePicker(
       context: context,
@@ -92,19 +96,22 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void saveTask() {
-    setState(() {
-      tasks.add({
+  // save task to firestore
+
+  Future<void> saveTask() async {
+    await firestore.collection("tasks").add({
         "title": titleController.text,
         "description": descriptionController.text,
-        "date": selectedDate!.toString().split("")[0],
+        "date": selectedDate!.toString(),
         "time": selectedTime!.format(context),
+      // "created": Timestamp.now()
       });
-    });
+
     titleController.clear();
     descriptionController.clear();
   }
 
+  // design
   @override
   Widget build(BuildContext context) {
     double sh = MediaQuery.sizeOf(context).height;
@@ -116,7 +123,6 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: Icon(Icons.menu),
         actions: [
           CircleAvatar(
-            // backgroundImage: AssetImage('assets/images/profile_pic'),
             radius: 25.0,
             child: IconButton(
               onPressed: () async {
@@ -152,89 +158,46 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             )
-          : ListView.builder(
+
+      // display tasks from firestore
+      :StreamBuilder<QuerySnapshot>(
+        stream: firestore.collection("tasks").orderBy("createdat").snapshots(),
+          builder: (context,snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator(),);
+            }
+            if(!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return Center(
+                child: Text("No tasks available"),
+              );
+            }
+            final tasks = snapshot.data!.docs;
+
+            // )
+            return ListView.builder(
               itemCount: tasks.length,
               itemBuilder: (context, index) {
-                final task = tasks[index];
-                return Card(
-                  margin: const EdgeInsets.all(10),
-                  child: ListTile(
-                    title: Text(task["title"]!),
-                    subtitle: Text(
-                      "${task["description"]}"
-                      "\n${"date"} ${task["time"]}",
-                    ),
+                var task = tasks[index];
+                      return Card(
+                        margin: const EdgeInsets.all(10),
+                child:  ListTile(
+                  title: Text(task["title"]),
+                  subtitle: Text(
+                    "${task["description"]}"
+                        "\n${"date"} ${task["time"]}",
+                  ),
                   ),
                 );
               },
-            ),
+            );
+          },
+      ),
       floatingActionButton: FloatingActionButton(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(50.0)),
         ),
         backgroundColor: Color(0xFF6C63FF),
         onPressed: openAddTaskDialog,
-        // showDialog(
-        //   context: context,
-        //   builder: (context) {
-        //     return Dialog(
-        //       child: SizedBox(
-        //         height: sh * 0.35,
-        //         width: sw * double.infinity,
-        //         child: Padding(
-        //           padding: const EdgeInsets.symmetric(
-        //             horizontal: 10,
-        //             vertical: 10,
-        //           ),
-        //           child: Column(
-        //             crossAxisAlignment: CrossAxisAlignment.start,
-        //             children: [
-        //               Text(
-        //                 "Add Task",
-        //                 style: TextStyle(fontSize: 25, color: Colors.white),
-        //               ),
-        //               SizedBox(height: 10),
-        //               TextField(
-        //                 decoration: InputDecoration(
-        //                   border: OutlineInputBorder(
-        //                     borderRadius: BorderRadius.circular(5),
-        //                   ),
-        //                 ),
-        //               ),
-        //               SizedBox(height: 10),
-        //               TextField(
-        //                 decoration: InputDecoration(
-        //                   border: OutlineInputBorder(
-        //                     borderRadius: BorderRadius.circular(5),
-        //                   ),
-        //                 ),
-        //               ),
-        //               SizedBox(height: 10),
-        //               Row(
-        //                 mainAxisAlignment: MainAxisAlignment.end,
-        //                 children: [
-        //                   IconButton(
-        //                     onPressed: ()  {
-        //                        showDatePicker(
-        //                         context: context,
-        //                         initialDate: DateTime.now(),
-        //                         firstDate: DateTime(2000),
-        //                         lastDate: DateTime(2050),
-        //                       );
-        //                       // if (picked != null) {
-        //                       //   Navigator.pop(context)
-        //                     },
-        //                     icon: Icon(Icons.send, size: 15),
-        //                   ),
-        //                 ],
-        //               ),
-        //             ],
-        //           ),
-        //         ),
-        //       ),
-        //     );
-        //   },
-        // );
         child: Icon(Icons.add, size: 25),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

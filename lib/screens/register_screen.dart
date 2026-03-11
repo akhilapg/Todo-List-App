@@ -36,8 +36,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             password: password.text,
           );
       if (credential.user != null) {
-        db
-            .collection("users")
+        db.collection("users")
             .doc(credential.user?.uid).set(user).then((_) {
               (DocumentReference doc) =>
               print('data added with ${credential.user?.uid}');

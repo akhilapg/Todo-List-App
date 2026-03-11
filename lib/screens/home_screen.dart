@@ -24,7 +24,24 @@ class _HomeScreenState extends State<HomeScreen> {
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
 
-  List<Map<String, String>> tasks = [];
+  List<Map<String, dynamic>> tasks = [];
+
+  // @override
+  // void initState() {
+  //
+  //   firestore.collection("tasks").get().then(
+  //         (querySnapshot) {
+  //       print("Successfully completed");
+  //       for (var docSnapshot in querySnapshot.docs) {
+  //         print('${docSnapshot.id} => ${docSnapshot.data()}');
+  //         tasks.add(docSnapshot.data());
+  //       }
+  //     },
+  //     onError: (e) => print("Error completing: $e"),
+  //   );
+  //   // TODO: implement initState
+  //   super.initState();
+  // }
 
 // add task dialog
   void openAddTaskDialog() {
@@ -141,8 +158,17 @@ class _HomeScreenState extends State<HomeScreen> {
           SizedBox(width: 15),
         ],
       ),
-      body: tasks.isEmpty
-          ? Center(
+      body: StreamBuilder<QuerySnapshot>(
+        stream: firestore.collection("tasks").orderBy("createdat").snapshots(),
+        builder: (context,snapshot) {
+          print("stream builder started");
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator(),);
+          }
+          if(!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            print("stream builder data is empty");
+
+          return  Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -157,41 +183,32 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-            )
+            );
+          }
+          final tasks = snapshot.data!.docs;
 
-      // display tasks from firestore
-      :StreamBuilder<QuerySnapshot>(
-        stream: firestore.collection("tasks").orderBy("createdat").snapshots(),
-          builder: (context,snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator(),);
-            }
-            if(!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return Center(
-                child: Text("No tasks available"),
-              );
-            }
-            final tasks = snapshot.data!.docs;
-
-            // )
-            return ListView.builder(
-              itemCount: tasks.length,
-              itemBuilder: (context, index) {
-                var task = tasks[index];
-                      return Card(
-                        margin: const EdgeInsets.all(10),
+          // )
+          return ListView.builder(
+            itemCount: tasks.length,
+            itemBuilder: (context, index) {
+              var task = tasks[index];
+              return Card(
+                margin: const EdgeInsets.all(10),
                 child:  ListTile(
                   title: Text(task["title"]),
                   subtitle: Text(
                     "${task["description"]}"
                         "\n${"date"} ${task["time"]}",
                   ),
-                  ),
-                );
-              },
-            );
-          },
+                ),
+              );
+            },
+          );
+        },
       ),
+
+      // display tasks from firestore
+
       floatingActionButton: FloatingActionButton(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(50.0)),

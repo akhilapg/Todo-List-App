@@ -111,6 +111,59 @@ class _HomeScreenState extends State<HomeScreen> {
     descriptionController.clear();
   }
 
+  //delete task
+  Future<void> deleteTask(String id) async {
+    await firestore.collection("tasks").doc(id).delete();
+  }
+
+  // edit dialog
+  void openEditDialog(String id,String title,String description){
+    titleController.text = title;
+    descriptionController.text = description;
+    showDialog(context: context, builder: (context) {
+      return AlertDialog(
+        title: Text("Edit Task"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: titleController,
+              decoration: InputDecoration(labelText: "Title"),
+            ),
+            SizedBox(height: 10,),
+            TextField(
+              controller: descriptionController,
+              decoration: InputDecoration(labelText: "Description"),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () {
+            Navigator.pop(context);
+          },
+            child: Text("Cancel"),
+          ),
+          ElevatedButton(onPressed: () async {
+            await updateTask(id);
+            Navigator.pop(context);
+          }, child: Text("Update"),),
+        ],
+      );
+    });
+  }
+
+  // update task function
+
+  Future<void> updateTask(String id) async {
+    await firestore.collection("tasks").doc(id).update({
+      "title":titleController.text,
+      "description":descriptionController.text,
+    });
+    titleController.clear();
+    descriptionController.clear();
+  }
+
+
   // design
   @override
   Widget build(BuildContext context) {
@@ -188,6 +241,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   subtitle: Text(
                     "${task["description"]}"
                         "\n${task["date"]} ${task["time"]}",
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(onPressed: () {
+                        openEditDialog(task.id, task["title"],task["description"],);
+                      }, icon: Icon(Icons.edit,color: Colors.blue,)),
+
+                      IconButton(onPressed: () {
+                        deleteTask(task.id);
+                      }, icon: Icon(Icons.delete,color: Colors.red,)),
+                    ],
                   ),
                   ),
                 );

@@ -270,16 +270,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
-      bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(onPressed: () {}, icon: Icon(Icons.home)),
-            IconButton(onPressed: () {}, icon: Icon(Icons.person)),
-          ],
-        ),
-      ),
+
     );
   }
 }

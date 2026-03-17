@@ -1,8 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo_list_app/firebase_options.dart';
 import 'package:todo_list_app/local_keys.dart';
+import 'package:todo_list_app/providers/bottom_nav_provider.dart';
+import 'package:todo_list_app/screens/bottom_nav.dart';
 import 'package:todo_list_app/screens/home_screen.dart';
 import 'package:todo_list_app/screens/login_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -33,7 +36,12 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
         primaryColor: Color(0xFF6C63FF),
       ),
-      home: auth_status ? HomeScreen() : LoginScreen(),
+      home: auth_status ? ChangeNotifierProvider(
+        create: (context) {
+          return BottomNavProvider();
+        }
+        ,child:BottomNav() ,
+      ) : LoginScreen(),
     );
   }
 }

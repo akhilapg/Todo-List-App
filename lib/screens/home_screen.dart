@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todo_list_app/hive_functions.dart';
 import 'package:todo_list_app/local_keys.dart';
 import 'package:todo_list_app/screens/add_task_screen.dart';
 import 'package:todo_list_app/screens/login_screen.dart';
@@ -107,6 +109,15 @@ class _HomeScreenState extends State<HomeScreen> {
       "createdAt": Timestamp.now()
       });
 
+    HiveFunctions.createTask({
+      "title": titleController.text,
+      "description" :descriptionController.text,
+      "date" :selectedDate!.toString(),
+      "time" :selectedTime!.format(context),
+      "createdAt" : Timestamp.now().toString()
+    });
+
+    
     titleController.clear();
     descriptionController.clear();
   }
@@ -248,7 +259,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       IconButton(onPressed: () {
                         openEditDialog(task.id, task["title"],task["description"],);
                       }, icon: Icon(Icons.edit,color: Colors.blue,)),
-
                       IconButton(onPressed: () {
                         deleteTask(task.id);
                       }, icon: Icon(Icons.delete,color: Colors.red,)),

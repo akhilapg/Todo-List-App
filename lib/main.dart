@@ -5,11 +5,15 @@ import 'package:todo_list_app/firebase_options.dart';
 import 'package:todo_list_app/local_keys.dart';
 import 'package:todo_list_app/screens/home_screen.dart';
 import 'package:todo_list_app/screens/login_screen.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'hive_box_const.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final prefs = await SharedPreferences.getInstance();
+  await Hive.initFlutter();
+  await Hive.openBox(userHiveBox);
   var auth_status = prefs.getBool(LocalKeys.auth_key)?? false;
   runApp(MyApp(auth_status: auth_status));
 }

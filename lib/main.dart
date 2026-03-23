@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo_list_app/firebase_options.dart';
 import 'package:todo_list_app/local_keys.dart';
 import 'package:todo_list_app/providers/bottom_nav_provider.dart';
+import 'package:todo_list_app/providers/task_provider.dart';
 import 'package:todo_list_app/screens/bottom_nav.dart';
 import 'package:todo_list_app/screens/home_screen.dart';
 import 'package:todo_list_app/screens/login_screen.dart';
@@ -36,12 +37,18 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
         primaryColor: Color(0xFF6C63FF),
       ),
-      home: auth_status ? ChangeNotifierProvider(
-        create: (context) {
-          return BottomNavProvider();
-        }
-        ,child:BottomNav() ,
-      ) : LoginScreen(),
+      home: auth_status ?
+          MultiProvider(providers: [
+            ChangeNotifierProvider(
+              create: (context) {
+                return BottomNavProvider();
+              }
+
+            ),
+            ChangeNotifierProvider(create: (context)=>TaskProvider())
+
+          ],child: BottomNav(),)
+       : LoginScreen(),
     );
   }
 }

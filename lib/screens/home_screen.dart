@@ -1,10 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/adapters.dart';
+
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo_list_app/hive_functions.dart';
 import 'package:todo_list_app/local_keys.dart';
-import 'package:todo_list_app/screens/add_task_screen.dart';
+import 'package:todo_list_app/providers/task_provider.dart';
 import 'package:todo_list_app/screens/login_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -241,32 +242,36 @@ class _HomeScreenState extends State<HomeScreen> {
             final tasks = snapshot.data!.docs;
 
             // )
-            return ListView.builder(
-              itemCount: tasks.length,
-              itemBuilder: (context, index) {
-                var task = tasks[index];
-                      return Card(
-                        margin: const EdgeInsets.all(10),
-                child:  ListTile(
-                  title: Text(task["title"]),
-                  subtitle: Text(
-                    "${task["description"]}"
-                        "\n${task["date"]} ${task["time"]}",
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(onPressed: () {
-                        openEditDialog(task.id, task["title"],task["description"],);
-                      }, icon: Icon(Icons.edit,color: Colors.blue,)),
-                      IconButton(onPressed: () {
-                        deleteTask(task.id);
-                      }, icon: Icon(Icons.delete,color: Colors.red,)),
-                    ],
-                  ),
-                  ),
+            return Consumer<TaskProvider>(
+              builder: (context,taskProvider,child) {
+                return ListView.builder(
+                  itemCount: tasks.length,
+                  itemBuilder: (context, index) {
+                    var task = tasks[index];
+                          return Card(
+                            margin: const EdgeInsets.all(10),
+                    child:  ListTile(
+                      title: Text(task["title"]),
+                      subtitle: Text(
+                        "${task["description"]}"
+                            "\n${task["date"]} ${task["time"]}",
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(onPressed: () {
+                            openEditDialog(task.id, task["title"],task["description"],);
+                          }, icon: Icon(Icons.edit,color: Colors.blue,)),
+                          IconButton(onPressed: () {
+                            deleteTask(task.id);
+                          }, icon: Icon(Icons.delete,color: Colors.red,)),
+                        ],
+                      ),
+                      ),
+                    );
+                  },
                 );
-              },
+              }
             );
           },
       ),
